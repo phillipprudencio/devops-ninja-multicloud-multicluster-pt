@@ -1,6 +1,6 @@
 spec:
   rules:
-    - host: app.multicloud.ml
+    - host: app.philtecnologia.com.br
       http:
         paths:
           - backend:

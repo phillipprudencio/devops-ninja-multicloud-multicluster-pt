@@ -36,13 +36,13 @@ https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html
 
 # RANCHER SERVER
 
-# --image-id              ami-01e7ca2ef94a0ae86
+# --image-id              ami-0b9064170e32bde34
 # --instance-type         t3.medium 
 # --key-name              multicloud 
-# --security-group-ids    sg-0b0e8363b215900f0 
-# --subnet-id             subnet-4f5e7705
+# --security-group-ids    sg-0337149a89509276b 
+# --subnet-id             subnet-0e696344
 
-$ aws ec2 run-instances --image-id ami-01e7ca2ef94a0ae86 --count 1 --instance-type t3.medium --key-name multicloud --security-group-ids sg-0b0e8363b215900f0 --subnet-id subnet-67c83f0e --user-data file://rancher.sh --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=rancherserver}]' 'ResourceType=volume,Tags=[{Key=Name,Value=rancherserver}]' 
+$ aws ec2 run-instances --image-id ami-0b9064170e32bde34 --count 1 --instance-type t3.medium --key-name multicloud --security-group-ids sg-0337149a89509276b --subnet-id subnet-0e696344 --user-data file://rancher.sh --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=rancherserver}]' 'ResourceType=volume,Tags=[{Key=Name,Value=rancherserver}]' 
 
 ```
 
@@ -50,7 +50,7 @@ $ aws ec2 run-instances --image-id ami-01e7ca2ef94a0ae86 --count 1 --instance-ty
 ## 3 - Configuração do Rancher
 Acessar o Rancher e configurar
 
-https://3.134.108.244
+https://18.217.196.140
 
 ## 4 - Configuração do Cluster Kubernetes.
 Criar o cluster pelo Rancher e configurar.
@@ -60,17 +60,19 @@ Criar o cluster pelo Rancher e configurar.
 ## 5 - Deployment do cluster pela aws-cli
 
 ```sh
-# --image-id ami-01e7ca2ef94a0ae86
+# --image-id ami-0b9064170e32bde34
 # --count 3 
 # --instance-type t3.large 
 # --key-name multicloud 
-# --security-group-ids sg-0b0e8363b215900f0 
-# --subnet-id subnet-09c5a4961e6056757 
+# --security-group-ids sg-0337149a89509276b
+# --subnet-id subnet-78e81f03 
 # --user-data file://k8s.sh
 
-$ aws ec2 run-instances --image-id ami-01e7ca2ef94a0ae86 --count 3 --instance-type t3.large --key-name multicloud --security-group-ids sg-0b0e8363b215900f0 --subnet-id subnet-67c83f0e --user-data file://k8s.sh   --block-device-mapping "[ { \"DeviceName\": \"/dev/sda1\", \"Ebs\": { \"VolumeSize\": 70 } } ]" --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=k8s}]' 'ResourceType=volume,Tags=[{Key=Name,Value=k8s}]'     
+$ aws ec2 run-instances --image-id ami-0b9064170e32bde34 --count 3 --instance-type t3.large --key-name multicloud --security-group-ids sg-0337149a89509276b --subnet-id subnet-78e81f03 --user-data file://k8s.sh   --block-device-mapping "[ { \"DeviceName\": \"/dev/sda1\", \"Ebs\": { \"VolumeSize\": 70 } } ]" --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=k8s}]' 'ResourceType=volume,Tags=[{Key=Name,Value=k8s}]'     
 ```
 
+$ aws ec2 run-instances --image-id ami-0b9064170e32bde34 --count 3 --instance-type t3.large --key-name multicloud --security-group-ids sg-0337149a89509276b --subnet-id subnet-78e81f03 --user-data file://k8s.sh   --block-device-mapping file://mapping.json --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=k8s}]' 'ResourceType=volume,Tags=[{Key=Name,Value=k8s}]'     
+```
 Instalar o kubectl 
 
 https://kubernetes.io/docs/tasks/tools/
@@ -99,9 +101,9 @@ Pelo console do Rancher
 ## 8 - Criação do certificado
 Criar certificado para nossos dominios:
 
- *.devops-ninja.ml
+ *.phildevopsaws.cloudns.ph
 
-
+	arn:aws:acm:us-east-2:316303010240:certificate/29708c22-a02c-4ef8-bfc2-d302be33e6a1
 ```sh
 > openssl req -new -x509 -keyout cert.pem -out cert.pem -days 365 -nodes
 Country Name (2 letter code) [AU]:DE
@@ -113,7 +115,7 @@ Common Name (eg, YOUR name) []:*.example.com
 Email Address []:webmaster@example.com
 ```
 
-arn:aws:acm:us-east-2:984102645395:certificate/ffdf5439-9d21-421e-b730-0dadb52bbd01
+arn:aws:acm:us-east-2:316303010240:certificate/29708c22-a02c-4ef8-bfc2-d302be33e6a1
 
 
 ## 9 - Configuração do ELB
@@ -124,35 +126,42 @@ arn:aws:acm:us-east-2:984102645395:certificate/ffdf5439-9d21-421e-b730-0dadb52bb
 
 # !! ESPECIFICAR O SECURITY GROUPS DO LOAD BALANCER
 
-# --subnets subnet-4f5e7705 subnet-67c83f0e
+# --subnets subnet-78e81f03 subnet-0e696344
 
-$ aws elbv2 create-load-balancer --name multicloud --type application --subnets subnet-4f5e7705 subnet-67c83f0e
-#	 "LoadBalancerArn": "arn:aws:elasticloadbalancing:us-east-2:984102645395:loadbalancer/app/multicloud/1a4af5c3698503fb"
+$ aws elbv2 create-load-balancer --name multicloud --type application --subnets subnet-78e81f03 subnet-0e696344
+#	 "LoadBalancerArn": "arn:aws:elasticloadbalancing:us-east-2:316303010240:loadbalancer/app/multicloud/7e7165f8e181516a"
 
-# --vpc-id vpc-238e664a
+# --vpc-id vpc-d420f7bd
 
-$ aws elbv2 create-target-group --name multicloud --protocol HTTP --port 80 --vpc-id vpc-238e664a --health-check-port 8080 --health-check-path /api/providers
-#	 "TargetGroupArn": "arn:aws:elasticloadbalancing:us-east-2:984102645395:targetgroup/multicloud/0e70910ded08498f"
+$ aws elbv2 create-target-group --name multicloud --protocol HTTP --port 80 --vpc-id vpc-d420f7bd --health-check-port 8080 --health-check-path /api/providers
+#	 "TargetGroupArn": "arn:aws:elasticloadbalancing:us-east-2:316303010240:targetgroup/multicloud/6526ee8d1783c86e"
 	
 	
 # REGISTRAR OS TARGETS  
-$ aws elbv2 register-targets --target-group-arn arn:aws:elasticloadbalancing:us-east-2:984102645395:targetgroup/multicloud/0e70910ded08498f --targets Id=i-04c0b078f1ef0968c Id=i-014c4de5f78e1d911 Id=i-0aea6b0657ad26b34
+$ aws elbv2 register-targets --target-group-arn arn:aws:elasticloadbalancing:us-east-2:316303010240:targetgroup/multicloud/6526ee8d1783c86e --targets Id=i-04a8295a2f6ab61b0 Id=i-032ad150508dc7beb Id=i-0fd37ab6d4572f753
 
 
-i-04c0b078f1ef0968c
-i-014c4de5f78e1d911
-i-0aea6b0657ad26b34
+i-04a8295a2f6ab61b0
+i-032ad150508dc7beb
+i-0fd37ab6d4572f753
 
-
-# ARN DO Certificado - arn:aws:acm:us-east-1:984102645395:certificate/fa016001-254f-4127-b51a-61588b15c555
+# ARN DO Certificado - arn:aws:acm:us-east-2:316303010240:certificate/29708c22-a02c-4ef8-bfc2-d302be33e6a1
 # HTTPS - CRIADO PRIMEIRO
+# Linux
 $ aws elbv2 create-listener \
-    --load-balancer-arn arn:aws:elasticloadbalancing:us-east-2:984102645395:loadbalancer/app/multicloud/1a4af5c3698503fb \
+    --load-balancer-arn arn:aws:elasticloadbalancing:us-east-2:316303010240:loadbalancer/app/multicloud/7e7165f8e181516a \
     --protocol HTTPS \
     --port 443 \
-    --certificates CertificateArn=arn:aws:acm:us-east-2:984102645395:certificate/ffdf5439-9d21-421e-b730-0dadb52bbd01   \
-    --ssl-policy ELBSecurityPolicy-2016-08 --default-actions Type=forward,TargetGroupArn=arn:aws:elasticloadbalancing:us-east-2:984102645395:targetgroup/multicloud/0e70910ded08498f
-#  "ListenerArn": "arn:aws:elasticloadbalancing:us-east-2:984102645395:listener/app/multicloud/1a4af5c3698503fb/0ba2e3ab81d739b7"
+    --certificates CertificateArn=arn:aws:acm:us-east-2:316303010240:certificate/29708c22-a02c-4ef8-bfc2-d302be33e6a1 \
+    --ssl-policy ELBSecurityPolicy-2016-08 --default-actions Type=forward,TargetGroupArn=arn:aws:elasticloadbalancing:us-east-2:316303010240:targetgroup/multicloud/6526ee8d1783c86e
+#Windows
+aws elbv2 create-listener `
+    --load-balancer-arn arn:aws:elasticloadbalancing:us-east-2:316303010240:loadbalancer/app/multicloud/7e7165f8e181516a `
+    --protocol HTTPS `
+    --port 443 `
+    --certificates CertificateArn=arn:aws:acm:us-east-2:316303010240:certificate/29708c22-a02c-4ef8-bfc2-d302be33e6a1 `
+    --ssl-policy ELBSecurityPolicy-2016-08 --default-actions Type=forward,TargetGroupArn=arn:aws:elasticloadbalancing:us-east-2:316303010240:targetgroup/multicloud/6526ee8d1783c86e    
+#  ListenerArn": "arn:aws:elasticloadbalancing:us-east-2:316303010240:listener/app/multicloud/7e7165f8e181516a/b224fca0e6706915
 
 
 $ aws elbv2 describe-target-health --target-group-arn targetgroup-arn

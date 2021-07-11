@@ -1,6 +1,6 @@
 spec:
   rules:
-    - host: api.multicloud.ml
+    - host: api.philtecnologia.com.br
       http:
         paths:
           - path: /book

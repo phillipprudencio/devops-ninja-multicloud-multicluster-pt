@@ -1,6 +1,6 @@
 spec:
   rules:
-    - host: cockroachdb.multicloud.ml
+    - host: cockroachdb.philtecnologia.com.br
       http:
         paths:
           - backend:
